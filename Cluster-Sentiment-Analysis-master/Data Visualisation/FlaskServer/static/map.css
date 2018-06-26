@@ -1,0 +1,90 @@
+/*
+Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+*/
+.header{
+  margin-right:auto;
+  margin-left:auto;
+  width: 1024px;
+  height:70px;
+  background: #64BDF7;
+  position: relative;
+}
+.headerTitle{
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: bold;
+  color: aliceblue;
+  position:absolute;
+  bottom: 0;
+}
+.menu{
+  margin-right:auto;
+  margin-left:auto;
+  width: 1024px;
+  font-size: 0;  
+  padding: 0;  
+  height: 25px; 
+  background-color: #3A2D3B;  
+  position: relative;  
+}
+#Aurin-Variable{
+position: absolute;
+right: 0;
+width:400px;
+height:25px;
+}
+.mapContainer{
+  width: 1024px;
+  height:400px;
+  margin-right:auto;
+  margin-left:auto;
+  position: relative;
+}
+.des_word{
+  /* display: none; */
+  margin-right:auto;
+  margin-left:auto;
+  width: 1024px;
+  background:white;
+  color: black;
+  position: relative;
+  z-index: 2;
+  /* visibility: hidden */
+}
+#map {
+  margin-right:auto;
+  margin-left:auto;
+  width: 1024px;
+  height: 50%;
+  z-index: 1;
+}
+#map_2 {
+  margin-right:auto;
+  margin-left:auto;
+  width: 1024px;
+  height: 50%;
+  z-index: 1;
+}
+
+
+ 
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+#data-label,#data-value{
+ position: absolute;
+ left: 0;
+ margin: 0;
+ color: white;  
+ font-size: 20px
+}
+#data-value{
+  position: absolute;
+  left:250px;
+}
+

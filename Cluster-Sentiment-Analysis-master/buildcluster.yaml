@@ -1,0 +1,66 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Create hosts
+  hosts: localhost
+  gather_facts: no
+  become: yes
+  roles:
+    - {role: launch_instance_and_attach_volume}
+    
+- name: Mount
+  hosts: instanceGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: make_file_system_and_mount}
+    
+- name: Install couchdb
+  hosts: instanceGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: install_environment_and_couchdb}
+    
+- name: Build cluster
+  hosts: masterGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: build_cluster}
+    
+- name: Build Spark
+  hosts: instanceGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: build_spark}
+    
+- name: Start spark service for master
+  hosts: masterGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: start_spark_service_for_master}
+    
+- name: Start spark service for slaves
+  hosts: slaveGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: start_spark_service_for_slaves}
+
+- name: Harvest Twitter
+  hosts: instanceGroup
+  gather_facts: no
+  remote_user: ubuntu
+  become: yes
+  roles:
+    - {role: build_python_environment}

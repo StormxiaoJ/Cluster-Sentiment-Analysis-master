@@ -1,0 +1,26 @@
+---
+- hosts: webserver
+  tasks:
+    - name: Build Environment
+      apt:
+        name:
+          - build-essential
+          - pkg-config
+          - erlang
+          - libicu-dev
+          - libmozjs185-dev
+          - libcurl4-openssl-dev
+        state: latest
+        install_recommends: no
+
+    - name: Download CouchDB
+      get_url:
+        url: http://apache.mirror.serversaustralia.com.au/couchdb/source/2.1.1/apache-couchdb-2.1.1.tar.gz
+        dest: /couchdb 
+
+    - name: unpack
+      unarchive: 
+        src: ~/couchdb/apache-couchdb-2.1.1.tar.gz
+        dest: ~/couchdb
+        remote_src: yes
+

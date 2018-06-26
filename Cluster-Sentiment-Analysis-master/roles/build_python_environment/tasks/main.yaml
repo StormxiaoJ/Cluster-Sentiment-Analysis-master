@@ -1,0 +1,75 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: install pip3
+  apt:
+    name:
+      - git
+      - python3-pip
+      - libopenmpi-dev
+      - python3-dev
+    state: latest
+    install_recommends: no
+
+- name: Install setuptools
+  command: sudo pip3 install --upgrade setuptools
+
+- name: Python3 Libs
+  pip:
+    name:
+      - couchdb
+      - textblob
+      - tweepy
+      - nltk
+      - vaderSentiment
+      - flask
+      - numpy
+      - geojson_utils
+      - mpi4py
+    executable: pip3
+  become: true    
+
+- name: Clone from GitHub
+  git:
+    repo: "https://github.com/lotharJiang/Cluster-Sentiment-Analysis"
+    dest: "/mnt/database/Cluster-Setiment-Analysis"
+    clone: yes
+    force: yes
+
+- name: Harvest Twitter
+  shell: "nohup python3 TwitterHarvest.py -a access{{groups.instanceGroup.index(inventory_hostname)}}.json -d db.json -g vic.json -l {{groups.instanceGroup.index(inventory_hostname)}} &"
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/TwitterHarvest
+    
+- name: Map Reduce
+  shell: nohup python3 CreateView.py -d db.json -v views.json &
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/MapReduce
+  when: "{{groups.instanceGroup.index(inventory_hostname)}} == 0"
+
+- name: task for instance0
+  shell: nohup python3 getTwitter.py -d db.json -g vic.json -s r1n -e r1p &
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/TwitterHarvest
+  when: "{{groups.instanceGroup.index(inventory_hostname)}} == 0"
+
+- name: task for instance1
+  shell: nohup python3 getTwitter.py -d db.json -g vic.json -s r1p -e r1q &
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/TwitterHarvest
+  when: "{{groups.instanceGroup.index(inventory_hostname)}} == 1"
+
+- name: task for instance2
+  shell: nohup python3 getTwitter.py -d db.json -g vic.json -s r1q -e r1r &
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/TwitterHarvest
+  when: "{{groups.instanceGroup.index(inventory_hostname)}} == 2"
+
+- name: task for instance3
+  shell: nohup python3 getTwitter.py -d db.json -g vic.json -s r1r -e r1z &
+  args:
+    chdir: /mnt/database/Cluster-Setiment-Analysis/TwitterHarvest
+  when: "{{groups.instanceGroup.index(inventory_hostname)}} == 3"
+ 
+

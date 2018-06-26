@@ -1,0 +1,81 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Launch the first instance
+  os_server:
+    state: present
+    auth:
+      auth_url: https://keystone.rc.nectar.org.au:5000/v2.0/
+      username: y.liu275@student.unimelb.edu.au
+      password: YmU3ZmFjMjJlYjgyZmYy
+      project_name: CCC2018-35
+    name: "{{item}}"
+    image: NeCTAR Ubuntu 16.04 LTS (Xenial) amd64
+    key_name: "{{key}}"
+    availability_zone: melbourne-qh2
+    timeout: 200
+    flavor: "1"
+    security_groups: default
+  with_sequence: start=0 end=0 format=node%x
+  register: masterInstance
+
+- name: Launch the rest instance(s)
+  os_server:
+    state: present
+    auth:
+      auth_url: https://keystone.rc.nectar.org.au:5000/v2.0/
+      username: y.liu275@student.unimelb.edu.au
+      password: YmU3ZmFjMjJlYjgyZmYy
+      project_name: CCC2018-35
+    name: "{{item}}"
+    image: NeCTAR Ubuntu 16.04 LTS (Xenial) amd64
+    key_name: "{{key}}"
+    availability_zone: melbourne-qh2
+    timeout: 200
+    flavor: "1"
+    security_groups: default
+  with_sequence: start=1 end={{num}} format=node%x
+  register: slaveInstances
+
+- name: Create volume
+  os_volume:
+    auth:
+      auth_url: https://keystone.rc.nectar.org.au:5000/v2.0/
+      username: y.liu275@student.unimelb.edu.au
+      password: YmU3ZmFjMjJlYjgyZmYy
+      project_name: CCC2018-35
+    state: present
+    availability_zone: melbourne-qh2
+    size: "{{volume}}"
+    display_name: "{{item}}"
+  with_sequence: start=0 end={{num}} format=volume%x
+
+- name: Attach volume to instance
+  os_server_volume:
+    auth:
+      auth_url: https://keystone.rc.nectar.org.au:5000/v2.0/
+      username: y.liu275@student.unimelb.edu.au
+      password: YmU3ZmFjMjJlYjgyZmYy
+      project_name: CCC2018-35
+    state: present
+    server: "node{{item}}"
+    volume: "volume{{item}}"
+  with_sequence: start=0 end={{num}}
+  
+- name: Let the first to be master node
+  add_host:
+    hostname: "{{item.openstack.interface_ip}}"
+    groups:
+      - instanceGroup
+      - masterGroup
+  with_items: "{{masterInstance.results}}"
+
+- name: Let the rest to be slave nodes
+  add_host:
+    hostname: "{{item.openstack.interface_ip}}"
+    groups: 
+      - instanceGroup
+      - slaveGroup
+  with_items: "{{slaveInstances.results}}"
+

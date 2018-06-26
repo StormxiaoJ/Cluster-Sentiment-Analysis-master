@@ -1,0 +1,8 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Add the new nodes
+  command: " curl -X PUT \"http://{{username}}:{{password}}@127.0.0.1:5986/_nodes/couchdb@{{item}}\" -d {} "
+  with_items: "{{groups.instanceGroup}}"
+    

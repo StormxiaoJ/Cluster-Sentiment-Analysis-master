@@ -1,0 +1,96 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Build Environment
+  apt:
+    name:
+      - default-jdk
+      - scala
+    state: latest
+    install_recommends: no
+
+- name: Edit hosts
+  lineinfile:
+    dest: /etc/hosts
+    insertafter: 'localhost'
+    firstmatch: yes
+    line: "{{item}} spark{{groups.instanceGroup.index(item)}}"
+    state: present
+  with_items: "{{groups.instanceGroup}}"
+
+- name: Download Spark
+  get_url:
+    url: https://archive.apache.org/dist/spark/spark-2.2.0/spark-2.2.0-bin-hadoop2.7.tgz
+    dest: /usr/local/src
+
+- name: Unpack
+  unarchive:
+    src: /usr/local/src/spark-2.2.0-bin-hadoop2.7.tgz
+    dest: /mnt/database/
+    remote_src: yes
+
+- name: Change Spark ownership
+  file:
+    path: /mnt/database/spark-2.2.0-bin-hadoop2.7
+    owner: ubuntu
+    group: ubuntu
+    recurse: yes
+
+- name: Rename spark-env.sh
+  command: mv /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/spark-env.sh.template /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/spark-env.sh
+
+- name: Rename slaves
+  command: mv /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves.template /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves
+
+- name: Change mode of spark-env
+  file:
+    path: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/spark-env.sh
+    owner: ubuntu
+    group: ubuntu
+    mode: 0770
+    
+- name: Change mode of slaves
+  file:
+    path: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves
+    owner: ubuntu
+    group: ubuntu
+    mode: 0770
+    
+- name: Edit master
+  lineinfile:
+    dest: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/spark-env.sh
+    line: "{{item}}"
+    state: present
+  with_items:
+    - "SPARK_MASTER_HOST=spark0"
+    - "SPARK_MASTER_PORT=7077"
+
+- name: remove localhost from slaves list
+  lineinfile:
+    dest: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves
+    regexp: "^localhost$"
+    state: absent
+    
+- name: Edit slaves
+  lineinfile:
+    dest: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves
+    line: "{{item}}"
+    state: present
+  with_sequence: start=1 end={{num}} format=spark%x
+  
+- name: Secure slaves
+  file:
+    path: /mnt/database/spark-2.2.0-bin-hadoop2.7/conf/slaves
+    owner: ubuntu
+    group: ubuntu
+    mode: 0644
+
+- name: Install Spark Service
+  copy:
+    src: spark.service
+    dest: /etc/systemd/system/spark.service
+    owner: root
+    group: root
+    mode: 0777
+ 

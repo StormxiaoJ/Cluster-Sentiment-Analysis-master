@@ -1,0 +1,41 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Set the slave nodes
+  command: " curl -X POST -H \"Content-Type: application/json\" http://{{username}}:{{password}}@127.0.0.1:5984/_cluster_setup -d \'{ \"action\" : \"enable_cluster\", \"bind_address\" : \"0.0.0.0\", \"username\" : \"{{username}}\", \"password\" : \"{{password}}\", \"port\" : 5984, \"node_count\" : \"{{num}}\", \"remote_node\" : \"{{item}}\", \"remote_current_user\" : \"{{username}}\", \"remote_current_password\" : \"{{password}}\" }\' "
+  with_items: "{{groups.slaveGroup}}"
+#  uri:
+#    url: http://127.0.0.1:5984/_cluster_setup
+#    user: "{{username}}"
+#    password: "{{password}}"
+#    method: POST
+#    headers:
+#      Content-Type: "application/json"
+#    body: ' { "action" : "enable_cluster", "bind_address" : "0.0.0.0", "username" : "{{username}}", "password" : "{{password}}", "port" : 5984, "node_count" : "{{num}}", "remote_node" : "{{item}}", "remote_current_user" : "{{username}}", "remote_current_password" : "{{password}}" }'
+#  with_items: groups.slaveGroups
+  
+- name: Add the slave nodes
+  command: " curl -X POST -H \"Content-Type: application/json\" http://{{username}}:{{password}}@127.0.0.1:5984/_cluster_setup -d \'{ \"action\" : \"add_node\", \"host\" : \"{{item}}\", \"port\" : 5984, \"username\" : \"{{username}}\", \"password\" : \"{{password}}\" }\' "
+  with_items: "{{groups.slaveGroup}}"
+#  uri:
+#    url: http://127.0.0.1:5984/_cluster_setup
+#    user: "{{username}}"
+#    password: "{{password}}"
+#    method: POST
+#    headers:
+#      Content-Type: "application/json"
+#    body: ' { "action" : "add_node", "host" : "{{item}}", "port" : 5984, "username" : "{{username}}", "password" : "{{password}}" }'
+#  with_items: groups.slaveGroups
+  
+- name: Complete the setup
+  command: " curl -X POST -H \"Content-Type: application/json\" http://{{username}}:{{password}}@127.0.0.1:5984/_cluster_setup -d \'{ \"action\" : \"finish_cluster\" }\' "
+#  uri:
+#    url: http://127.0.0.1:5984/_cluster_setup
+#    user: "{{username}}"
+#    password: "{{password}}"
+#    method: POST
+#    headers:
+#      Content-Type: "application/json"
+#    body: ' { "action" : "finish_cluster" }'
+    

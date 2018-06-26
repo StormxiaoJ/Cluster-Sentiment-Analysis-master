@@ -1,0 +1,14 @@
+---
+- hosts: webserver
+  become: yes
+  tasks:
+#    - name: Download CouchDB
+#      get_url:
+#        url: http://apache.mirror.serversaustralia.com.au/couchdb/source/2.1.1/apache-couchdb-2.1.1.tar.gz
+#        dest: /couchdb 
+
+    - name: unpack
+      unarchive: 
+        src: ~/couchdb/apache-couchdb-2.1.1.tar.gz
+        dest: ~/couchdb/db
+        remote_src: yes

@@ -1,0 +1,24 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: Edit service file for slaves
+  lineinfile:
+    dest: /etc/systemd/system/spark.service
+    insertafter: 'Type=forking'
+    line: "{{item}}"
+    state: present
+  with_items:
+    - "ExecStart=/mnt/database/spark-2.2.0-bin-hadoop2.7/sbin/start-slave.sh spark://{{groups.masterGroup.0}}:7077"
+    - "ExecStop=/mnt/database/spark-2.2.0-bin-hadoop2.7/sbin/stop-slave.sh"
+    
+- name: Enable Spark Service
+  systemd:
+    daemon-reload: yes
+    name: spark
+    enabled: yes
+
+- name: Start Spark Service
+  systemd:
+    name: spark
+    state: started

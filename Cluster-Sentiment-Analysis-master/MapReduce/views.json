@@ -1,0 +1,30 @@
+[{
+  "doc":"tweets_analysis",
+  "view_name":"suburb_polarity",
+  "map_fun":"function(doc) { emit(doc.suburb, doc.polarity);}",
+  "reduce_fun":"function(keys, values) { return sum(values)/values.length }"
+},
+{
+  "doc":"tweets_analysis",
+  "view_name":"suburb_day_polarity",
+  "map_fun":"function(doc) { emit([doc.suburb,doc.created_at], doc.polarity);}",
+  "reduce_fun":"function(keys, values) { return sum(values)/values.length }"
+},
+{
+  "doc":"tweets_analysis",
+  "view_name":"suburb_drunk",
+  "map_fun":"function(doc) { emit(doc.suburb, doc.drunk);}",
+  "reduce_fun":"function(keys, values) { return sum(values)/values.length }"
+},
+{
+  "doc":"tweets_analysis",
+  "view_name":"suburb_day_drunk",
+  "map_fun":"function(doc) { emit([doc.suburb, doc.created_at], doc.drunk);}",
+  "reduce_fun":"function(keys, values) { return sum(values)/values.length }"
+},
+{
+  "doc":"tweets_analysis",
+  "view_name":"suburb_hash",
+  "map_fun":"function (doc) {if(doc.hashtags.length>0){for(var i=0; i < doc.hashtags.length;i++){sub_hash = [doc.suburb, doc.hashtags[i]];emit(sub_hash, 1);}}}",
+  "reduce_fun":"function(keys, values) { return sum(values)}"
+}]

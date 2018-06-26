@@ -1,0 +1,9 @@
+{
+  "user":"admin",
+  "password":"admin",
+  "host":"localhost",
+  "port":"5984",
+  "processed_database":"processed_twitter",
+  "raw_database":"raw_tweet",
+  "tweet_source":"http://45.113.232.90/couchdbro/twitter/_design/twitter/_view/geoindex"
+}

@@ -1,0 +1,15 @@
+---
+- hosts: webserver
+  remote_user: root
+  tasks:
+    - name: Build Environment
+      apt:
+        name:
+          - build-essential
+          - pkg-config
+          - erlang
+          - libicu-dev
+          - libmozjs185-dev
+          - libcur14-openssl-dev
+     state: latest
+     install_commends: no

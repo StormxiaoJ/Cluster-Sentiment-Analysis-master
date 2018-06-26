@@ -1,0 +1,121 @@
+#Cluster Sentiment Analysis Project, CCC2018-35, Melbourne
+#Members: Yan Jiang 816920, Yijiang Liu 848008, Zihua Liu 857673, Zhenxiang Wang 879694, Lingtao Jiang 867583
+
+---
+- name: System Update
+  apt:
+    update_cache: yes
+    upgrade: dist
+    
+- name: Build Environment
+  apt:
+    name:
+      - build-essential
+      - pkg-config
+      - erlang
+      - libicu-dev
+      - libmozjs185-dev
+      - libcurl4-openssl-dev
+    state: latest
+    install_recommends: no
+
+- name: Download CouchDB
+  get_url:
+    url: http://apache.mirror.serversaustralia.com.au/couchdb/source/2.1.1/apache-couchdb-2.1.1.tar.gz
+    dest: /usr/local/src
+  
+- name: Unpack
+  unarchive:
+    src: /usr/local/src/apache-couchdb-2.1.1.tar.gz
+    dest: /usr/local/src
+    remote_src: yes
+    
+- name: ./Configure
+  command: chdir=/usr/local/src/apache-couchdb-2.1.1 ./configure
+  
+- name: Make install
+  make:
+    chdir: /usr/local/src/apache-couchdb-2.1.1
+    target: release
+    
+- name: Add CouchDB Administrator
+  user:
+    name: couchdb
+    comment: CouchDB Administrator
+    system: yes
+    shell: /bin/bash
+    home: /mnt/database/
+    createhome: no
+    
+- name: Copy to Attached Volume
+  command: cp -R /usr/local/src/apache-couchdb-2.1.1/rel/couchdb /mnt/database/
+  
+- name: Change Ownership
+  file:
+    path: /mnt/database/couchdb
+    owner: couchdb
+    group: couchdb
+    recurse: yes
+
+- name: Find CouchDB directories and change permission
+  command: find /mnt/database/couchdb -type d -exec chmod 0770 {} \;
+   
+    
+- name: Update permission for ini files
+  command: find /mnt/database/couchdb/etc -type f -maxdepth 1 -exec chmod 0644 {} \;
+  
+- name: Change nodes name
+  replace:
+    dest: /mnt/database/couchdb/etc/vm.args
+    regexp: "^-name couchdb@127.0.0.1$"
+    replace: "-name couchdb@{{inventory_hostname}}"
+
+- name: Change the cookie
+  replace:
+    dest: /mnt/database/couchdb/etc/vm.args
+    regexp: "^-setcookie monster$"
+    replace: "-setcookie {{cookie}}"
+      
+- name: Bind address for node-local
+  lineinfile:
+    dest: /mnt/database/couchdb/etc/local.ini
+    insertafter: "[httpd]"
+    line: "bind_address = 0.0.0.0"
+
+- name: Bind address for cluster mode
+  lineinfile:
+    dest: /mnt/database/couchdb/etc/local.ini
+    insertafter: '\[chttpd\]'
+    line: "bind_address = 0.0.0.0"
+
+- name: Set the administer
+  lineinfile:
+    dest: /mnt/database/couchdb/etc/local.ini
+    insertafter: '\[admins\]'
+    line: "{{username}} = {{password}}"
+
+- name: Install CouchDB Service
+  copy:
+    src: couchdb.service
+    dest: /etc/systemd/system/couchdb.service
+    owner: root
+    group: root
+    mode: 0777
+
+- name: Enable CouchDB Service
+  systemd:
+    daemon-reload: yes
+    name: couchdb
+    enabled: yes
+
+- name: Start CouchDB Service
+  systemd:
+    name: couchdb
+    state: started
+              
+- name: Change the number of replicas
+  replace:
+    dest: /mnt/database/couchdb/etc/default.ini
+    regexp: "^n=3$"
+    replace: "n=2"
+ 
